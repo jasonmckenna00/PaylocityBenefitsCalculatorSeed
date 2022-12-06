@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react"
 import Dependent from "./Dependent"
-import { DependentForm } from "./DependentForm"
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 export const DependentListing = (props) => {
   // const [dependents, setDependents] = useState([])
-  const selectedEmployee = useSelector( state => state.employees.find(emp => emp.id === state.selectedEmployee))
-  const dependents = useSelector(state => state.dependents.filter(x => x.employeeId === selectedEmployee.id))
+  // const selectedEmployee = useSelector( state => state.employees.find(emp => emp.id === state.selectedEmployee))
+  const selectedEmployee = useSelector( state => state.employees[state.selectedEmployee])
+  
+  const dependents = useSelector(state => Object.values(state.dependents).filter(x => x.employeeId === selectedEmployee?.id))
   // const dependents = useSelector(state => state.dependents)
 
   

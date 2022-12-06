@@ -1,13 +1,13 @@
 //if edit -> Passs in employee props, Change h1 to edit employee
 // create either put or post request
 
-import { useEffect, useReducer, useState } from "react";
-import { currencyFormat, dateFormat } from "../../Constants";
+import { useEffect, useState } from "react";
+import { dateFormat } from "../../Constants";
 import { useSelector, useDispatch } from 'react-redux';
 import {postEmployee, putEmployee} from '../../actions/EmployeeActions';
 
 const AddEmployeeModal = () => {
-  const selectedEmployee = useSelector( state => state.employees.find(emp => emp.id === state.selectedEmployee))
+  const selectedEmployee = useSelector( state => state.employees[state.selectedEmployee])
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [salary, setSalary] = useState(0)

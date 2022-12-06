@@ -49,7 +49,7 @@ export const postDependent = (dependent) => async dispatch => {
   }
   catch (error){
     const resp = {'success':false,'error':'400', 'message':error}
-    console.log(resp)
+    return resp
   }
 }
 

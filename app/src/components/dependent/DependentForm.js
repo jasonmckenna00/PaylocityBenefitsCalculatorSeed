@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { postDependent, putDependent } from "../../actions/DependentActions";
 import { dateFormat, relationshipMap } from "../../Constants";
@@ -9,9 +9,9 @@ export const DependentForm = (props) => {
   const [relationship, setRelationship] = useState(0)
   const [errors, setErrors] = useState(null)
 
-  const selectedDependent = useSelector(state => state.dependents.find(x => x.id === state.selectedDependent))
-  const selectedEmployee = useSelector( state => state.employees.find(emp => emp.id === state.selectedEmployee))
-  const dependents = useSelector(state => state.dependents.filter(x => x.employeeId === selectedEmployee.id))
+  const selectedDependent = useSelector(state => state.dependents[state.selectedDependent])
+  const selectedEmployee = useSelector( state => state.employees[state.selectedEmployee])
+  const dependents = useSelector(state => Object.values(state.dependents).filter(x => x.employeeId === selectedEmployee?.id))
 
   const dispatch = useDispatch()
 
@@ -43,7 +43,6 @@ export const DependentForm = (props) => {
     if (selectedDependent){
       dispatch(putDependent(selectedDependent.id,{firstName, lastName, dateOfBirth, relationship:formatedRelationship}))
       .then(resp => {
-        debugger
         if (resp.success) setErrors(null)
         if (!resp.success) setErrors(resp.message) 
       })

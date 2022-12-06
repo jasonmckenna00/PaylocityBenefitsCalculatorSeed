@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { DependentListing } from "./DependentListing"
 import { DependentForm } from "./DependentForm"
 import { useSelector, useDispatch } from 'react-redux';
@@ -6,8 +6,7 @@ import { deselectDependent } from "../../actions/DependentActions";
 
 const DependentModal = (props) => {
   const [formOpen,setFormOpen] = useState(false)
-  const selectedEmployee = useSelector( state => state.employees.find(emp => emp.id === state.selectedEmployee))
-  const dependents = useSelector(state => state.dependents.filter(x => x.employeeId === selectedEmployee?.id))
+  const selectedEmployee = useSelector( state => state.employees[state.selectedEmployee])
 
   const dispatch = useDispatch()
  

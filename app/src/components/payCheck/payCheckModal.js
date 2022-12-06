@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useEffect } from 'react';
+import { useSelector} from 'react-redux';
 import { currencyFormat } from '../../Constants';
 
 const PayCheckModal = (props) =>{
-  const selectedEmployee = useSelector( state => state.employees.find(emp => emp.id === state.selectedEmployee))
-  const dependents = useSelector(state => state.dependents.filter(x => x.employeeId === selectedEmployee?.id)) || []
+  const selectedEmployee = useSelector( state => state.employees[state.selectedEmployee])
+
+  const dependents = useSelector(state => Object.values(state.dependents).filter(x => x.employeeId === selectedEmployee?.id))
   
   useEffect(()=>{
 

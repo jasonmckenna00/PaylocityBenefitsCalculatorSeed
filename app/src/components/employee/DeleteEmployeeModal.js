@@ -2,7 +2,9 @@ import {deleteEmployee} from '../../actions/EmployeeActions';
 import { useSelector, useDispatch } from 'react-redux';
 const DeleteEmployeeModal = (props) =>{
   const dispatch = useDispatch()
-  const selectedEmployee = useSelector( state => state.employees.find(emp => emp.id === state.selectedEmployee))
+  const selectedEmployee = useSelector( state => state.employees[state.selectedEmployee])
+
+
 
 
   return (

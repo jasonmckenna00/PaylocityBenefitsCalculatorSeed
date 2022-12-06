@@ -13,7 +13,7 @@ import { getDependents } from '../../actions/DependentActions';
 
 const EmployeeListing = () => {
     // const [employees, setEmployees] = useState([]);
-    const employees = useSelector( state => state.employees)
+    const employees = useSelector( state => Object.values(state.employees)) 
     const [error, setError] = useState(null);
     const dispatch = useDispatch()
 

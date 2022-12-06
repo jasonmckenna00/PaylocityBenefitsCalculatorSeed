@@ -1,31 +1,31 @@
 import { SELECT_DEPENDENT, DESELECT_DEPENDENT, REMOVE_DEPENDENT, ADD_DEPENDENT } from "../actions/DependentActions"
 import { GET_All_EMPLOYEES, ADD_EMPLOYEE, UPDATE_EMPLOYEE, REMOVE_EMPLOYEE, SELECT_EMPLOYEE, DESELECT_EMPLOYEE } from "../actions/EmployeeActions"
+import _ from "lodash";
 
 
-export const employeeReducer = function (state = [], action){
+export const employeeReducer = function (state = {}, action){
   Object.freeze(state)
+  const newState = Object.assign({}, state)
   switch(action.type){
     case GET_All_EMPLOYEES:
-      return action.payload.data
+      return _.mapKeys(action.payload.data, 'id')
     case ADD_EMPLOYEE:
-      return [...state, action.payload.data]
+      newState[action.payload.data.id]= action.payload.data
+      return newState
     case UPDATE_EMPLOYEE:
-      const filtered = state.filter(x=> x.id !== action.payload.data.id)
-      return [action.payload.data, ...filtered]
+      newState[action.payload.data.id] = action.payload.data
+      return newState
     case REMOVE_EMPLOYEE:
-      const removed = state.filter(x=> x.id !== action.payload.data.id)
-      return removed
+      delete newState[action.payload.data.id]
+      return newState
     case ADD_DEPENDENT:
-      const employee = state.find(x=> x.id === action.payload.data.employeeId)
-      employee.dependents.push(action.payload.data)
-      const oldState = state.filter(x=> x.id !== action.payload.data.employeeId)
-      return [employee, ...oldState,]
+      newState[action.payload.data.employeeId].dependents.push(action.payload.data)
+      return newState
     case REMOVE_DEPENDENT:
-      const targetEmp = state.find(x=> x.id === action.payload.data.employeeId)
-      const newDeps = targetEmp.dependents.filter(x=>x.id !== action.payload.data.id)
-      targetEmp.dependents = newDeps
-      
-      return [targetEmp, ...state.filter(x=> x.id !== action.payload.data.employeeId)]
+      const empId = action.payload.data.employeeId
+      const newDeps = newState[empId].dependents.filter(x=>x.id !== action.payload.data.id)
+      newState[empId].dependents = newDeps
+      return newState
 
     default: return state
   }

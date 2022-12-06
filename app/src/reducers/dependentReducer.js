@@ -4,22 +4,26 @@ import { REMOVE_EMPLOYEE } from "../actions/EmployeeActions";
 
 
 
-export const dependentReducer = function (state = [], action){
+export const dependentReducer = function (state = {}, action){
   Object.freeze(state)
+  const newState = Object.assign({}, state)
+
   switch(action.type){
     case GET_All_DEPENDENTS:
-      return action.payload.data
+      return _.mapKeys(action.payload.data, 'id')
     case ADD_DEPENDENT:
-      return [...state, action.payload.data]
+      newState[action.payload.data.id]= action.payload.data
+      return newState
     case UPDATE_DEPENDENT:
-      const filtered = state.filter(x=> x.id !== action.payload.data.id)
-      return [action.payload.data, ...filtered]
+      newState[action.payload.data.id] = action.payload.data
+      return newState
     case REMOVE_DEPENDENT:
-      const removed = state.filter(x=> x.id !== action.payload.data.id)
-      return removed
+      delete newState[action.payload.data.id]
+      return newState
     case REMOVE_EMPLOYEE:
-      const withoutEmp = state.filter(x=> x.employeeId !== action.payload.data.id)
-      return withoutEmp
+
+      const withoutEmp = Object.values(newState).filter(x=> x.employeeId !== action.payload.data.id)
+      return _.mapKeys(withoutEmp, 'id')
     default: return state
   }
 }
