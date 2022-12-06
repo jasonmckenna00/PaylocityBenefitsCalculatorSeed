@@ -1,4 +1,6 @@
-﻿namespace Api.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Api.Models
 {
     public class Dependent
     {
@@ -6,8 +8,11 @@
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public DateTime DateOfBirth { get; set; }
+
+        [EnumDataType(typeof(Relationship))] 
         public Relationship Relationship { get; set; }
         public int EmployeeId { get; set; }
+
         public Employee? Employee { get; set; }
     }
 }

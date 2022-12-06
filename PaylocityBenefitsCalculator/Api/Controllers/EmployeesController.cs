@@ -1,7 +1,12 @@
-﻿using Api.Dtos.Dependent;
+﻿using System.Security.Cryptography.X509Certificates;
+using Api.Data;
+using Api.Dtos.Dependent;
 using Api.Dtos.Employee;
 using Api.Models;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Controllers
@@ -10,112 +15,117 @@ namespace Api.Controllers
     [Route("api/v1/[controller]")]
     public class EmployeesController : ControllerBase
     {
+        private readonly EmployeeDbContext _context;
+        private readonly IMapper _mapper;
+        public EmployeesController(EmployeeDbContext context, IMapper mapper)
+        {
+            _context = context;
+            _mapper = mapper;
+        }
+        
         [SwaggerOperation(Summary = "Get employee by id")]
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<GetEmployeeDto>>> Get(int id)
         {
-            throw new NotImplementedException();
+            var result = new ApiResponse<GetEmployeeDto>();
+            var employee = await _context.Employees
+                .Include(x=>x.Dependents)
+                .FirstOrDefaultAsync(x=> x.Id == id);
+            
+            if (employee == null)
+            {
+                result.Error = "404";
+                result.Message = "Unable to find Employee";
+                result.Success = false;
+            }
+            else
+            {
+                result.Data = _mapper.Map<GetEmployeeDto>(employee);
+                result.Success = true;
+            }
+
+            return result;
+
+            //throw new NotImplementedException();
         }
 
         [SwaggerOperation(Summary = "Get all employees")]
         [HttpGet("")]
         public async Task<ActionResult<ApiResponse<List<GetEmployeeDto>>>> GetAll()
         {
-            //task: use a more realistic production approach
-            var employees = new List<GetEmployeeDto>
-            {
-                new()
-                {
-                    Id = 1,
-                    FirstName = "LeBron",
-                    LastName = "James",
-                    Salary = 75420.99m,
-                    DateOfBirth = new DateTime(1984, 12, 30)
-                },
-                new()
-                {
-                    Id = 2,
-                    FirstName = "Ja",
-                    LastName = "Morant",
-                    Salary = 92365.22m,
-                    DateOfBirth = new DateTime(1999, 8, 10),
-                    Dependents = new List<GetDependentDto>
-                    {
-                        new()
-                        {
-                            Id = 1,
-                            FirstName = "Spouse",
-                            LastName = "Morant",
-                            Relationship = Relationship.Spouse,
-                            DateOfBirth = new DateTime(1998, 3, 3)
-                        },
-                        new()
-                        {
-                            Id = 2,
-                            FirstName = "Child1",
-                            LastName = "Morant",
-                            Relationship = Relationship.Child,
-                            DateOfBirth = new DateTime(2020, 6, 23)
-                        },
-                        new()
-                        {
-                            Id = 3,
-                            FirstName = "Child2",
-                            LastName = "Morant",
-                            Relationship = Relationship.Child,
-                            DateOfBirth = new DateTime(2021, 5, 18)
-                        }
-                    }
-                },
-                new()
-                {
-                    Id = 3,
-                    FirstName = "Michael",
-                    LastName = "Jordan",
-                    Salary = 143211.12m,
-                    DateOfBirth = new DateTime(1963, 2, 17),
-                    Dependents = new List<GetDependentDto>
-                    {
-                        new()
-                        {
-                            Id = 4,
-                            FirstName = "DP",
-                            LastName = "Jordan",
-                            Relationship = Relationship.DomesticPartner,
-                            DateOfBirth = new DateTime(1974, 1, 2)
-                        }
-                    }
-                }
-            };
+            var result = new ApiResponse<List<GetEmployeeDto>>();
+            var employees = await _context.Employees
+                .Include(x => x.Dependents)
+                .ToListAsync();
             
-            var result = new ApiResponse<List<GetEmployeeDto>>
-            {
-                Data = employees,
-                Success = true
-            };
-            
+
+            result.Data = _mapper.Map<List<GetEmployeeDto>>(employees);
+
             return result;
+            
         }
 
         [SwaggerOperation(Summary = "Add employee")]
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<List<AddEmployeeDto>>>> AddEmployee(AddEmployeeDto newEmployee)
-        { 
-            throw new NotImplementedException();
+        public async Task<ActionResult<ApiResponse<AddEmployeeDto>>> AddEmployee(AddEmployeeDto newEmployee)
+        {
+            var result = new ApiResponse<AddEmployeeDto>();
+            var employee = _mapper.Map<Employee>(newEmployee);
+            _context.Employees.Add(employee);
+            await _context.SaveChangesAsync();
+            result.Data = _mapper.Map<AddEmployeeDto>(employee);
+            return result;
+
         }
 
         [SwaggerOperation(Summary = "Update employee")]
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<GetEmployeeDto>>> UpdateEmployee(int id, UpdateEmployeeDto updatedEmployee)
         {
-            throw new NotImplementedException();
+            var result = new ApiResponse<GetEmployeeDto>();
+            var employee = await _context.Employees
+                .Include(x => x.Dependents)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (employee == null)
+            {
+                result.Error = "404";
+                result.Message = "Unable to find Employee";
+                result.Success = false;
+                return result;
+            }
+
+            employee.FirstName = updatedEmployee.FirstName;
+            employee.LastName = updatedEmployee.LastName;
+            employee.Salary = updatedEmployee.Salary;
+            
+            _context.Employees.Update(employee);
+            await _context.SaveChangesAsync();
+
+            result.Data = _mapper.Map<GetEmployeeDto>(employee);
+            return result;
+
         }
 
         [SwaggerOperation(Summary = "Delete employee")]
         [HttpDelete("{id}")]
-        public async Task<ActionResult<ApiResponse<List<GetEmployeeDto>>>> DeleteEmployee(int id)
+        public async Task<ActionResult<ApiResponse<GetEmployeeDto>>> DeleteEmployee(int id)
         {
-            throw new NotImplementedException();
+            var result = new ApiResponse<GetEmployeeDto>();
+            var employee = await _context.Employees.FindAsync(id);
+            if (employee == null)
+            {
+                result.Error = "404";
+                result.Message = "Unable to find Employee";
+                result.Success = false;
+                return result;
+            }
+            
+
+            _context.Employees.Remove(employee);
+            await _context.SaveChangesAsync();
+            result.Data = _mapper.Map<GetEmployeeDto>(employee);
+            return result;
+
         }
     }
 }

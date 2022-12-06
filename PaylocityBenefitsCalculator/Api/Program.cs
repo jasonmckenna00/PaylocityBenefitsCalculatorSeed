@@ -1,3 +1,6 @@
+using Api.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +9,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+
+var connectionString = builder.Configuration.GetConnectionString("employeeDb");
+builder.Services.AddDbContext<EmployeeDbContext>(options => 
+    options.UseSqlite(connectionString));
+//    options.UseSqlServer(connectionString));
+
+builder.Services.AddAutoMapper(typeof(Program));
+  
+
+
+
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c => {
     c.EnableAnnotations();
@@ -24,6 +40,8 @@ builder.Services.AddCors(options =>
         policy  =>
         {
             policy.WithOrigins("http://localhost:3000", "http://localhost");
+            policy.AllowAnyHeader();
+            policy.AllowAnyMethod();
         });
 });
 
